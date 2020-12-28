@@ -167,16 +167,4 @@ class Elements {
           );
         });
   }
-
-  // static loadImageAsset(String imagePath, String placeholderPath) {
-  //   File file = File('${globals.dir.path}$imagePath');
-  //   if (file.existsSync()) {
-  //     return FileImage(file);
-  //   } else {
-  //     if (placeholderPath != null && placeholderPath != "") {
-  //       return AssetImage(placeholderPath);
-  //     }
-  //     return AssetImage("assets/images/itinker_logo.png");
-  //   }
-  // }
 }
