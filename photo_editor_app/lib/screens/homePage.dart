@@ -4,9 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_editor_app/screens/aboutUs.dart';
+import 'package:photo_editor_app/screens/griditem.dart';
 import 'package:photo_editor_app/screens/photoEditing.dart';
 import 'package:photo_editor_app/utils/custom_colors.dart';
 import 'package:photo_editor_app/utils/elements.dart';
+import 'dart:async';
+import 'package:flutter/widgets.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -14,19 +17,56 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  var selectedList = List();
+  
+  final Directory _photoDir =
+      new Directory('data/user/0/com.example.photo_editor_app/app_flutter');
   final picker = ImagePicker();
   int currentIndex = 0;
   File userImgFile, schoolIDImgFile;
   String userImgPath, schoolImgPath;
+  int select = 0;
   @override
   Widget build(BuildContext context) {
+    var refreshGridView;
+    var size = MediaQuery.of(context).size;
+    final double itemHeight = (size.height - kToolbarHeight - 24) / 2;
+    final double itemWidth = size.width / 2;
+
+    var imageList = _photoDir
+        .listSync()
+        .map((item1) => item1.path)
+        .where((item1) => item1.endsWith(".jpg"))
+        .toList(growable: false);
     return Scaffold(
       appBar: new AppBar(
         title: new Text("Photo Editor"),
       ),
-      body: Container(
-        child: Center(child: new Text("Add images to edit")),
-      ),
+      body:GridView.builder(
+          itemCount: imageList.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: (itemWidth / itemHeight),
+              crossAxisSpacing: 2,
+              mainAxisSpacing: 2),
+          itemBuilder: (context, index) {
+            return GridItem(
+                item: File(imageList[index]),
+                isSelected: (bool value) {
+                  setState(() {
+                    if (value) {
+                      selectedList.add(imageList[index]);
+                    } else {
+                      selectedList.remove(imageList[index]);
+                    }
+                  });
+                  print("$index : $value");
+                },
+                );
+          }),
+
+     
+          
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -76,8 +116,6 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      // bottomNavigationBar: new BottomNavigationBar(items: ),
-
       bottomNavigationBar: BottomNavigationBar(
         onTap: onTappedBar,
         currentIndex: currentIndex,
@@ -109,6 +147,38 @@ class _HomePageState extends State<HomePage> {
       }
     });
   }
+
+  // Widget griditem(){
+  //   return InkWell(
+  //     onTap: () {
+  //       setState(() {
+  //         isSelected = !isSelected;
+  //         widget.isSelected(isSelected);
+  //       });
+  //     },
+  //     child: Stack(
+  //       children: <Widget>[
+  //         Image.asset(
+  //           widget.item.imageUrl,
+  //           color: Colors.black.withOpacity(isSelected ? 0.9 : 0),
+  //           colorBlendMode: BlendMode.color,
+  //         ),
+  //         isSelected
+  //             ? Align(
+  //           alignment: Alignment.bottomRight,
+  //           child: Padding(
+  //             padding: const EdgeInsets.all(8.0),
+  //             child: Icon(
+  //               Icons.check_circle,
+  //               color: Colors.blue,
+  //             ),
+  //           ),
+  //         )
+  //             : Container()
+  //       ],
+  //     ),
+  //   );
+  // }
 
   void getCameraImageDetails() async {
     final pickedFile = await picker.getImage(source: ImageSource.camera);
@@ -173,9 +243,17 @@ class _HomePageState extends State<HomePage> {
     if (croppedFile != null) {
       userImgFile = croppedFile;
       setState(() {
-        Navigator.push(context,
-                    new MaterialPageRoute(builder: (context) => PhotoEditing(croppedFile)));
+        Navigator.push(
+            this.context,
+            new MaterialPageRoute(
+                builder: (context) => PhotoEditing(croppedFile)));
       });
     }
   }
+}
+
+class Item {
+  File imageUrl; 
+
+  Item(this.imageUrl);
 }

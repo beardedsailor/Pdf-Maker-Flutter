@@ -1,8 +1,10 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 class MakePdf extends StatefulWidget {
-  final File imageData;
+  // final Uint8List imageData;
+   final File imageData;
   MakePdf(this.imageData);
   @override
   _MakePdfState createState() => _MakePdfState();

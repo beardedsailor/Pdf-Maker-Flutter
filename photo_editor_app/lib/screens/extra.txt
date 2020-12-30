@@ -1,0 +1,128 @@
+ // body: ListView.builder(
+      //     itemCount: imageList.length,
+      //     itemBuilder: (context, index) {
+      //       File file = new File(imageList[index]);
+      //       String name = file.path.split('/').last;
+      //       return Column(
+      //         children: [
+      //           Padding(
+      //             padding: const EdgeInsets.all(8.0),
+      //             child: GestureDetector(
+      //               child: Padding(
+      //                 padding: const EdgeInsets.all(8.0),
+      //                 child: Row(
+      //                   // mainAxisAlignment: MainAxisAlignment.spaceAround,
+      //                   children: [
+      //                     Container(
+      //                       width: 110,
+      //                       height: 110,
+      //                       child: new Image.file(
+      //                         File(imageList[index]),
+      //                         fit: BoxFit.cover,
+      //                       ),
+      //                     ),
+      //                     Padding(
+      //                       padding: const EdgeInsets.all(25.0),
+      //                       child: Column(
+      //                         children: [
+      //                           Text(
+      //                             "Image ${index + 1}",
+      //                             style: Elements.textStyle(20.0, Colors.black),
+      //                           ),
+      //                         ],
+      //                       ),
+      //                     ),
+      //                     new Checkbox(value: null, onChanged: null)
+      //                   ],
+      //                 ),
+      //               ),
+      //               onTap: () {
+      //                 // print karn wala page te jana
+      //               },
+      //             ),
+      //           ),
+      //           new Divider(
+      //             thickness: 1.0,
+      //             color: Colors.grey,
+      //           )
+      //         ],
+      //       );
+
+//     ListTile(
+//       title: Text('${imageList[index]}'),
+
+//       leading: Container(
+//         width: 100,
+
+//         decoration: BoxDecoration(),
+//         child:Image.file(
+//                               File(imageList[index]),
+//                               fit: BoxFit.cover,
+//                             ),
+//                             )
+//     );
+//   },
+// ),
+
+//       GridView.builder(
+//         itemCount: imageList.length,
+//         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+//             crossAxisCount: 3, childAspectRatio: 3.0 / 4.6),
+//         itemBuilder: (context, index) {
+//           File file = new File(imageList[index]);
+//           String name = file.path.split('/').last;
+//           return GestureDetector(
+//             child: Card(
+//               shape: RoundedRectangleBorder(
+//                 borderRadius: BorderRadius.circular(8.0),
+//               ),
+//               child: Padding(
+//                   padding: const EdgeInsets.all(5.0),
+//                   child: select != 0
+//                        ? InkWell(
+//                           child: Stack(
+//                           alignment: Alignment.center,
+//                           children: [
+//                             Image.file(
+//                               File(imageList[index]),
+//                               fit: BoxFit.cover,
+//                             ),
+//                             CircleAvatar(
+//                                 // decoration: BoxDecoration(color: CustomColors.themeBlue,
+//                                 // borderRadius: BorderRadius.circular(8.0)
+//                                 // ),
+//                                 backgroundColor: CustomColors.themeBlue,
+//                                 child: new Icon(
+//                                   Icons.check,
+//                                   size: 20,
+//                                   color: Colors.white,
+//                                 ))
+//                           ],
+//                         ))
+//                       : InkWell(
+//                           child: Padding(
+//                             padding: new EdgeInsets.all(4.0),
+//                             child: Image.file(
+//                               File(imageList[index]),
+//                               fit: BoxFit.cover,
+//                             ),
+//                           ),
+//                         )
+
+//                           // Padding(
+//                           //   padding: new EdgeInsets.all(4.0),
+//                           //   child:
+//                           // ),
+//                           ),
+//             ),
+//             onTap: () {
+//               select = 1;
+//               setState(() {
+//                 select = 1;
+//               });
+//               print(index);
+//               print(select);
+
+//             },
+//           );
+//         },
