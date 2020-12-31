@@ -18,17 +18,16 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   var selectedList = List();
-  
   final Directory _photoDir =
-      new Directory('data/user/0/com.example.photo_editor_app/app_flutter');
+      new Directory('/storage/emulated/0/photo_editor_app/'); 
   final picker = ImagePicker();
   int currentIndex = 0;
   File userImgFile, schoolIDImgFile;
   String userImgPath, schoolImgPath;
   int select = 0;
+  
   @override
   Widget build(BuildContext context) {
-    var refreshGridView;
     var size = MediaQuery.of(context).size;
     final double itemHeight = (size.height - kToolbarHeight - 24) / 2;
     final double itemWidth = size.width / 2;
@@ -60,7 +59,7 @@ class _HomePageState extends State<HomePage> {
                       selectedList.remove(imageList[index]);
                     }
                   });
-                  print("$index : $value");
+                  print("$selectedList");
                 },
                 );
           }),
@@ -120,8 +119,6 @@ class _HomePageState extends State<HomePage> {
         onTap: onTappedBar,
         currentIndex: currentIndex,
         backgroundColor: Colors.lightBlue,
-        // selectedItemColor: CustomColors.themeOrange,
-        // unselectedItemColor: CustomColors.themeBlue,
 
         items: [
           BottomNavigationBarItem(
@@ -148,38 +145,6 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  // Widget griditem(){
-  //   return InkWell(
-  //     onTap: () {
-  //       setState(() {
-  //         isSelected = !isSelected;
-  //         widget.isSelected(isSelected);
-  //       });
-  //     },
-  //     child: Stack(
-  //       children: <Widget>[
-  //         Image.asset(
-  //           widget.item.imageUrl,
-  //           color: Colors.black.withOpacity(isSelected ? 0.9 : 0),
-  //           colorBlendMode: BlendMode.color,
-  //         ),
-  //         isSelected
-  //             ? Align(
-  //           alignment: Alignment.bottomRight,
-  //           child: Padding(
-  //             padding: const EdgeInsets.all(8.0),
-  //             child: Icon(
-  //               Icons.check_circle,
-  //               color: Colors.blue,
-  //             ),
-  //           ),
-  //         )
-  //             : Container()
-  //       ],
-  //     ),
-  //   );
-  // }
-
   void getCameraImageDetails() async {
     final pickedFile = await picker.getImage(source: ImageSource.camera);
     if (pickedFile != null) {
@@ -187,8 +152,6 @@ class _HomePageState extends State<HomePage> {
         userImgPath = pickedFile.path;
         userImgFile = File(pickedFile.path);
         _cropImage();
-        //  Navigator.push(context,
-        //               new MaterialPageRoute(builder: (context) => PhotoEditing(userImgFile)));
       });
     } else {
       print('No image selected.');
@@ -202,8 +165,6 @@ class _HomePageState extends State<HomePage> {
         userImgPath = pickedFile.path;
         userImgFile = File(pickedFile.path);
         _cropImage();
-        // Navigator.push(context,
-        //             new MaterialPageRoute(builder: (context) => PhotoEditing(userImgFile)));
       });
     } else {
       print('No image selected.');

@@ -1,20 +1,15 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:image_picker_saver/image_picker_saver.dart';
-import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart' as syspaths;
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_editor_app/screens/homePage.dart';
-import 'package:photo_editor_app/screens/makepdf.dart';
 import 'package:photo_editor_app/utils/custom_colors.dart';
 import 'package:photo_editor_app/utils/elements.dart';
 import 'package:photofilters/photofilters.dart';
 import 'package:flutter/rendering.dart';
-// import 'package:flutter/material.dart';
-// import 'package:flutter/rendering.dart';
 import 'dart:ui' as ui;
-import 'dart:io' as Io;
 
 class PhotoEditing extends StatefulWidget {
   final File userImgFile;
@@ -30,12 +25,57 @@ class _PhotoEditingState extends State<PhotoEditing> {
   String fileName;
   List<Filter> filters = presetFiltersList;
   int currentIndex = 0;
-  File _storedImage;
   Uint8List bytes1;
+  List<double> blackwhitematrix = [
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    1.5,
+    0
+  ];
+  List<double> original = [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+  ];
 
   @override
   void initState() {
+    _requestPermission();
     imageFile = widget.userImgFile;
+
     super.initState();
   }
 
@@ -59,16 +99,7 @@ class _PhotoEditingState extends State<PhotoEditing> {
                       size: 32,
                     ),
                     onPressed: () async {
-                      if (currentIndex == 0) {
-                        _takePicture();
-                      } else if (currentIndex == 1) {
-                        // final bytes1 = await capture(_globalKey);
-                        // setState(() {
-                        //   this.bytes1 = bytes1;
-                        // });
-                        // _takePicture();
-                        _capturePng();
-                      }
+                      _saveScreen();
                     })
               ]),
           backgroundColor: CustomColors.themeBlue,
@@ -79,33 +110,21 @@ class _PhotoEditingState extends State<PhotoEditing> {
               Navigator.pop(context);
             },
           )),
-
-      //  Elements.appBar("Add Effects", Icons.arrow_back, () {
-      //   Navigator.pop(context);
-      // }),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Container(
-            width: screenWidth,
-            height: screenHeight * 0.8,
-            key: _globalKey,
-            child: currentIndex == 0
-                ? Image.file(
-                    imageFile,
-                    width: screenWidth,
-                    height: screenHeight * 0.8,
-                    fit: BoxFit.fitWidth,
-                  )
-                :
-                // : buildImage(bytes1)
-                filteredImage()),
+          width: screenWidth,
+          height: screenHeight * 0.8,
+          child: currentIndex == 0
+              ? filteredImage(original)
+              : filteredImage(blackwhitematrix),
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         onTap: onTappedBar,
         currentIndex: currentIndex,
         backgroundColor: Colors.lightBlue,
         selectedItemColor: CustomColors.themeBlue,
-        // unselectedItemColor: CustomColors.themeBlue,
         items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.photo),
@@ -124,42 +143,20 @@ class _PhotoEditingState extends State<PhotoEditing> {
     setState(() {
       currentIndex = index;
       if (currentIndex == 0) {
+        filteredImage(original);
         setState(() {});
       } else if (currentIndex == 1) {
-        filteredImage();
-        setState(() {
-          // _storedImage=imageFile;
-        });
+        filteredImage(blackwhitematrix);
+        setState(() {});
       }
     });
   }
 
-  Widget filteredImage() {
+  Widget filteredImage(List<double> colorScheme) {
     return RepaintBoundary(
       key: _globalKey,
       child: ColorFiltered(
-          colorFilter: ColorFilter.matrix(<double>[
-            0,
-            1,
-            0,
-            0,
-            0,
-            0,
-            1,
-            0,
-            0,
-            0,
-            0,
-            1,
-            0,
-            0,
-            0,
-            0,
-            1,
-            0,
-            1.5,
-            0
-          ]),
+          colorFilter: ColorFilter.matrix(colorScheme),
           child: Image.file(
             imageFile,
             fit: BoxFit.fitWidth,
@@ -167,67 +164,34 @@ class _PhotoEditingState extends State<PhotoEditing> {
     );
   }
 
-  Future<void> _takePicture() async {
+  _requestPermission() async {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.storage,
+    ].request();
+
+    final info = statuses[Permission.storage].toString();
+    print(info);
+    _toastInfo(info);
+  }
+
+  _saveScreen() async {
+    RenderRepaintBoundary boundary =
+        _globalKey.currentContext.findRenderObject();
+    ui.Image image = await boundary.toImage();
+    ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    final result =
+        await ImageGallerySaver.saveImage(byteData.buffer.asUint8List());
+
+    print(result);
+    _toastInfo(result.toString());
+
     setState(() {
-      _storedImage = imageFile;
+      Navigator.push(
+          context, new MaterialPageRoute(builder: (context) => HomePage()));
     });
-
-    final appDir = await syspaths.getApplicationDocumentsDirectory();
-    print(appDir);
-    final fileName = path.basename(imageFile.path);
-    print(fileName);
-    final savedImage = await imageFile.copy('${appDir.path}/$fileName');
-    print(savedImage);
-    Navigator.push(this.context,
-        new MaterialPageRoute(builder: (context) => HomePage()));
-    setState(() {});
   }
 
-  // static Future capture(GlobalKey key) async {
-  //   if (key == null) return null;
-
-  //   RenderRepaintBoundary boundary = key.currentContext.findRenderObject();
-  //   final image = await boundary.toImage(pixelRatio: 3);
-  //   final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-  //   final pngBytes = byteData.buffer.asUint8List();
-
-  //   return pngBytes;
-  // }
-
-  Widget buildImage(Uint8List bytes) {
-    return bytes != null ? Image.memory(bytes) : Container();
-  }
-
-  Future<void> _capturePng() async {
-    try {
-      print('inside');
-      RenderRepaintBoundary boundary =
-          _globalKey.currentContext.findRenderObject();
-      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-      ByteData byteData =
-          await image.toByteData(format: ui.ImageByteFormat.png);
-      var pngBytes = byteData.buffer.asUint8List();
-      var filePath = await ImagePickerSaver.saveFile(fileData: pngBytes);
-      print(filePath);
-      var bs64 = base64Encode(pngBytes);
-      // print(pngBytes);
-      // print(bs64);
-      // print(image);
-      // Uint8List bytes = base64Decode(bs64);
-
-      // File file = new File("outputimage.png");
-
-      // var file = Io.File("output.png");
-      // file.writeAsBytesSync(bytes);
-      //      final appDir = await syspaths.getApplicationDocumentsDirectory();
-      // final fileName = path.basename(imageFile.path);
-      // final savedImage = await imageFile.copy('${appDir.path}/$fileName');
-      // Widget outputimage = Image.memory(bytes);
-      // Navigator.push(this.context,
-      //     new MaterialPageRoute(builder: (context) => MakePdf(savedImage)));
-      return pngBytes;
-    } catch (e) {
-      print(e);
-    }
+  _toastInfo(String info) {
+    Fluttertoast.showToast(msg: info, toastLength: Toast.LENGTH_LONG);
   }
 }
