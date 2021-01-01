@@ -2,11 +2,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 class GridItem extends StatefulWidget {
-  // final Key key;
+  final Key key;
   final File item;
   final ValueChanged<bool> isSelected;
 
-  GridItem({this.item, this.isSelected});
+  GridItem({this.item, this.isSelected, this.key});
 
   @override
   _GridItemState createState() => _GridItemState();

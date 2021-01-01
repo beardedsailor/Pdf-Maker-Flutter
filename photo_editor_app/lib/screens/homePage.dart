@@ -10,6 +10,7 @@ import 'package:photo_editor_app/utils/custom_colors.dart';
 import 'package:photo_editor_app/utils/elements.dart';
 import 'dart:async';
 import 'package:flutter/widgets.dart';
+import 'package:pdf/widgets.dart' as pw;
 
 class HomePage extends StatefulWidget {
   @override
@@ -19,30 +20,37 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   var selectedList = List();
   final Directory _photoDir =
-      new Directory('/storage/emulated/0/photo_editor_app/'); 
+      new Directory('/storage/emulated/0/photo_editor_app/');
   final picker = ImagePicker();
   int currentIndex = 0;
   File userImgFile, schoolIDImgFile;
   String userImgPath, schoolImgPath;
   int select = 0;
-  
+  var imageList;
+  var tempOutput;
+  bool value;
+  // Key _key = new Key("listOfItems");
+  int lengthOfSelectedList = 0;
+  // List<File> _files = [];
+  final pdf = pw.Document();
+
+  @override
+  void initState() {
+    loadImageList();
+    super.initState();
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     final double itemHeight = (size.height - kToolbarHeight - 24) / 2;
     final double itemWidth = size.width / 2;
 
-    var imageList = _photoDir
-        .listSync()
-        .map((item1) => item1.path)
-        .where((item1) => item1.endsWith(".jpg"))
-        .toList(growable: false);
     return Scaffold(
-      appBar: new AppBar(
-        title: new Text("Photo Editor"),
-      ),
-      body:GridView.builder(
-          itemCount: imageList.length,
+      appBar: getAppBar(),
+      body: GridView.builder(
+          itemCount: tempOutput.length,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               childAspectRatio: (itemWidth / itemHeight),
@@ -50,22 +58,19 @@ class _HomePageState extends State<HomePage> {
               mainAxisSpacing: 2),
           itemBuilder: (context, index) {
             return GridItem(
-                item: File(imageList[index]),
-                isSelected: (bool value) {
+                item: File(tempOutput[index]),
+                isSelected: (value) {
                   setState(() {
                     if (value) {
-                      selectedList.add(imageList[index]);
+                      selectedList.add(tempOutput[index]);
                     } else {
-                      selectedList.remove(imageList[index]);
+                      selectedList.remove(tempOutput[index]);
                     }
                   });
-                  print("$selectedList");
+                  // print("$selectedList");
                 },
-                );
+                key: Key(tempOutput[index].toString()));
           }),
-
-     
-          
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -115,35 +120,42 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        onTap: onTappedBar,
-        currentIndex: currentIndex,
-        backgroundColor: Colors.lightBlue,
+      bottomNavigationBar: BottomAppBar(
+        child: Container(
+          height: 60,
+          color: Colors.lightBlue,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              new IconButton(
+                  icon: new Icon(
+                    Icons.camera_alt,
+                    semanticLabel: "Camera",
+                  ),
+                  onPressed: () {
+                    getCameraImageDetails();
+                  }),
+              new IconButton(
+                  icon: new Icon(Icons.photo_library),
+                  onPressed: () {
+                    getgalleryImageDetails();
+                  }),
+              new IconButton(
+                  icon: new Icon(Icons.picture_as_pdf),
+                  onPressed: () async {
+                    // createPdf();
+                    // final pdf = await createPdf();
+                    // await savePdf(pdf);
+                  }),
+            ],
+          ),
+        ),
 
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.camera),
-            label: 'Camera',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_a_photo),
-            label: 'Add Photo',
-          ),
-        ],
+        
       ),
     );
   }
 
-  void onTappedBar(int index) {
-    setState(() {
-      currentIndex = index;
-      if (currentIndex == 0) {
-        getCameraImageDetails();
-      } else if (currentIndex == 1) {
-        getgalleryImageDetails();
-      }
-    });
-  }
 
   void getCameraImageDetails() async {
     final pickedFile = await picker.getImage(source: ImageSource.camera);
@@ -211,10 +223,77 @@ class _HomePageState extends State<HomePage> {
       });
     }
   }
+
+  getAppBar() {
+    lengthOfSelectedList = selectedList.length;
+    print(lengthOfSelectedList);
+    return AppBar(
+      title: Text(selectedList.length < 1
+          ? "Photo Editor"
+          : "${selectedList.length} item selected"),
+      actions: <Widget>[
+        selectedList.length < 1
+            ? Container()
+            : InkWell(
+                onTap: () {
+                  while (lengthOfSelectedList > 0) {
+                    new File(selectedList[0]).delete();
+                    // print(tempOutput);
+                    tempOutput.remove(selectedList[0]);
+                    // print(tempOutput);
+                    // print("list1== + $selectedList");
+                    selectedList.removeAt(0);
+                    // print("list2== + $selectedList");
+                    // print(lengthOfSelectedList);
+                    lengthOfSelectedList--;
+                  }
+                  setState(() {});
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(Icons.delete),
+                ))
+      ],
+    );
+  }
+
+  loadImageList() {
+    imageList = _photoDir
+        .listSync()
+        .map((item1) => item1.path)
+        .where((item1) => item1.endsWith(".jpg"))
+        .toList();
+    tempOutput = imageList.toList();
+  }
+
+  // createPdf() {
+  //   for (var i = 0; i < selectedList.length; i++) {
+  //     var image = PdfImage.file(
+  //       pdf.document,
+  //       bytes: File(selectedList[i]).readAsBytesSync(),
+  //     );
+
+  //     pdf.addPage(pw.Page(
+  //         pageFormat: PdfPageFormat.a4,
+  //         build: (pw.Context context) {
+  //           // ignore: deprecated_member_use
+  //           return pw.Center(child: pw.Image(image));
+  //         }));
+  //   }
+  // }
+
+  // Future savePdf(pdf) async {
+  //   print(pdf);
+  //   Directory tempDir = await getTemporaryDirectory();
+  //   String tempPath = tempDir.path;
+  //   File file = File('$tempPath/1234.pdf');
+  //   file.writeAsBytesSync(pdf);
+  //   print(tempDir.listSync());
+  // }
 }
 
 class Item {
-  File imageUrl; 
-
-  Item(this.imageUrl);
+  File imageUrl;
+  int rank;
+  Item(this.imageUrl, this.rank);
 }
