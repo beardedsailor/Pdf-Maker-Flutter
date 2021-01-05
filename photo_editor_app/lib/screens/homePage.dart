@@ -1,16 +1,18 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_editor_app/screens/aboutUs.dart';
-import 'package:photo_editor_app/screens/griditem.dart';
+import 'package:photo_editor_app/screens/makepdf.dart';
+import 'package:photo_editor_app/screens/pdfviewerhistory.dart';
 import 'package:photo_editor_app/screens/photoEditing.dart';
 import 'package:photo_editor_app/utils/custom_colors.dart';
 import 'package:photo_editor_app/utils/elements.dart';
 import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:photo_editor_app/utils/griditem.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -19,8 +21,11 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   var selectedList = List();
-  final Directory _photoDir =
-      new Directory('/storage/emulated/0/photo_editor_app/');
+  List<File> images = [];
+  Directory _photoDir =
+      new Directory('data/user/0/com.example.photo_editor_app/app_flutter');
+  // Directory _photoDir = new Directory('/storage/emulated/0/photo_editor_app/');
+  // final   Directory _photoDir =  getApplicationDocumentsDirectory();
   final picker = ImagePicker();
   int currentIndex = 0;
   File userImgFile, schoolIDImgFile;
@@ -29,14 +34,17 @@ class _HomePageState extends State<HomePage> {
   var imageList;
   var tempOutput;
   bool value;
-  // Key _key = new Key("listOfItems");
   int lengthOfSelectedList = 0;
-  // List<File> _files = [];
   final pdf = pw.Document();
+  List<Future<String>> documentPath = [];
 
   @override
   void initState() {
-    loadImageList();
+    _requestPermission();
+    setState(() {
+      _photoDir = new Directory('/storage/emulated/0/photo_editor_app/');
+      loadImageList();
+    });
     super.initState();
     setState(() {});
   }
@@ -67,7 +75,6 @@ class _HomePageState extends State<HomePage> {
                       selectedList.remove(tempOutput[index]);
                     }
                   });
-                  // print("$selectedList");
                 },
                 key: Key(tempOutput[index].toString()));
           }),
@@ -129,6 +136,15 @@ class _HomePageState extends State<HomePage> {
             children: [
               new IconButton(
                   icon: new Icon(
+                    Icons.history_rounded,
+                    semanticLabel: "History",
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+            context, new MaterialPageRoute(builder: (context) => PdfHistory(documentPath)));
+                  }),
+              new IconButton(
+                  icon: new Icon(
                     Icons.camera_alt,
                     semanticLabel: "Camera",
                   ),
@@ -143,19 +159,21 @@ class _HomePageState extends State<HomePage> {
               new IconButton(
                   icon: new Icon(Icons.picture_as_pdf),
                   onPressed: () async {
-                    // createPdf();
-                    // final pdf = await createPdf();
-                    // await savePdf(pdf);
+                    for (var i in selectedList) {
+                      images.add(File(i));
+                    }
+                    if (images != null) {
+                      Future<String> path = exportPdf(images);
+                      documentPath.add(path);
+                      print(documentPath[0]);
+                    }
                   }),
             ],
           ),
         ),
-
-        
       ),
     );
   }
-
 
   void getCameraImageDetails() async {
     final pickedFile = await picker.getImage(source: ImageSource.camera);
@@ -238,13 +256,8 @@ class _HomePageState extends State<HomePage> {
                 onTap: () {
                   while (lengthOfSelectedList > 0) {
                     new File(selectedList[0]).delete();
-                    // print(tempOutput);
                     tempOutput.remove(selectedList[0]);
-                    // print(tempOutput);
-                    // print("list1== + $selectedList");
                     selectedList.removeAt(0);
-                    // print("list2== + $selectedList");
-                    // print(lengthOfSelectedList);
                     lengthOfSelectedList--;
                   }
                   setState(() {});
@@ -257,7 +270,16 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  loadImageList() {
+  _requestPermission() async {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.storage,
+    ].request();
+
+    final info = statuses[Permission.storage].toString();
+    print(info);
+  }
+
+  loadImageList() async {
     imageList = _photoDir
         .listSync()
         .map((item1) => item1.path)
@@ -266,30 +288,13 @@ class _HomePageState extends State<HomePage> {
     tempOutput = imageList.toList();
   }
 
-  // createPdf() {
-  //   for (var i = 0; i < selectedList.length; i++) {
-  //     var image = PdfImage.file(
-  //       pdf.document,
-  //       bytes: File(selectedList[i]).readAsBytesSync(),
-  //     );
+  photodirValue() async {
+    new Timer(const Duration(milliseconds: 1000), () {
+      _photoDir = new Directory('/storage/emulated/0/photo_editor_app/');
+    });
+  }
 
-  //     pdf.addPage(pw.Page(
-  //         pageFormat: PdfPageFormat.a4,
-  //         build: (pw.Context context) {
-  //           // ignore: deprecated_member_use
-  //           return pw.Center(child: pw.Image(image));
-  //         }));
-  //   }
-  // }
-
-  // Future savePdf(pdf) async {
-  //   print(pdf);
-  //   Directory tempDir = await getTemporaryDirectory();
-  //   String tempPath = tempDir.path;
-  //   File file = File('$tempPath/1234.pdf');
-  //   file.writeAsBytesSync(pdf);
-  //   print(tempDir.listSync());
-  // }
+  int index = 0;
 }
 
 class Item {

@@ -10,12 +10,6 @@ class SetupRoutes {
   static Map<String, WidgetBuilder> get routes {
     return {
       Routes.HOME_PAGE: (context) => HomePage(),
-      // Routes.LOGIN: (context) => Login(),
-      // Routes.SIGN_UP: (context) => SignUp(),
-      // Routes.FORGOT_PASSWORD: (context) => ForgotPassword(),
-      // Routes.COURSE_PAGE: (context) => CourseScreen(),
-      // Routes.SPLASH_SCREEN: (context) => SplashScreenView(),
-      // Routes.BOTTOM_BAR: (context) => BottomBar(),
     };
   }
 }

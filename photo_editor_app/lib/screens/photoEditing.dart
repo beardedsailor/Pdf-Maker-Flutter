@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_editor_app/screens/homePage.dart';
 import 'package:photo_editor_app/utils/custom_colors.dart';
@@ -181,6 +182,10 @@ class _PhotoEditingState extends State<PhotoEditing> {
     ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     final result =
         await ImageGallerySaver.saveImage(byteData.buffer.asUint8List());
+    print(result);
+    var appDocDir = await getTemporaryDirectory();
+    print(appDocDir);
+    final Directory check = await getApplicationDocumentsDirectory();
 
     print(result);
     _toastInfo(result.toString());
