@@ -36,7 +36,7 @@ class _HomePageState extends State<HomePage> {
   bool value;
   int lengthOfSelectedList = 0;
   final pdf = pw.Document();
-  List<Future<String>> documentPath = [];
+  List<String> documentPath = [];
 
   @override
   void initState() {
@@ -140,8 +140,12 @@ class _HomePageState extends State<HomePage> {
                     semanticLabel: "History",
                   ),
                   onPressed: () {
+                    selectedList.clear();
+                    // print(documentPath[1]);
                     Navigator.push(
-            context, new MaterialPageRoute(builder: (context) => PdfHistory(documentPath)));
+                        context,
+                        new MaterialPageRoute(
+                            builder: (context) => PdfHistory()));
                   }),
               new IconButton(
                   icon: new Icon(
@@ -158,14 +162,14 @@ class _HomePageState extends State<HomePage> {
                   }),
               new IconButton(
                   icon: new Icon(Icons.picture_as_pdf),
-                  onPressed: () async {
+                  onPressed: ()  async {
                     for (var i in selectedList) {
                       images.add(File(i));
                     }
                     if (images != null) {
-                      Future<String> path = exportPdf(images);
-                      documentPath.add(path);
-                      print(documentPath[0]);
+                    String a=await exportPdf(images);
+                      documentPath.add(a);
+                      // print(documentPath);
                     }
                   }),
             ],

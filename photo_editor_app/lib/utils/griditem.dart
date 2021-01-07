@@ -41,8 +41,7 @@ class _GridItemState extends State<GridItem> {
                 color: Colors.blue,
               ),
             ),
-          )
-              : Container()
+          ): Container()
         ],
       ),
     );

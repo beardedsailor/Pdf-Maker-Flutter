@@ -3,7 +3,9 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-Future<String> exportPdf(List<File> images) {
+var file1;
+File file;
+exportPdf(List<File> images) async {
   final Document pdf = Document();
   final filesToImages = images
       // ignore: deprecated_member_use
@@ -34,11 +36,15 @@ Future<String> exportPdf(List<File> images) {
         );
       },
       build: (Context context) => <Widget>[...filesToImages]));
-  Future<String> a = savePdf(pdf);
+  String a = await savePdf(pdf);
   return a;
+  // return file.path.toString();
+
+  // Future<String> a = savePdf(pdf);
+  // return a;
 }
 
-Future<String> savePdf(Document pdf) async {
+savePdf(Document pdf) async {
   const pdfPathAndroid = "storage/emulated/0/photo_edito_app";
   //this supports only android currently
   final bool permission = await permision.checkPermission();
@@ -51,13 +57,16 @@ Future<String> savePdf(Document pdf) async {
       appDocDir.create();
     }
     final now = DateTime.now().millisecondsSinceEpoch.toString();
-    final File file = File('${appDocDir.path}/${now.substring(9)}.pdf');
+    print(appDocDir.path);
+    file = File('${appDocDir.path}/+${now.substring(9)}.pdf');
     await file.create(recursive: true);
     final data = pdf.save();
     await file.writeAsBytes(data);
+
     return file.path;
   }
-  return null;
+
+  return "";
 }
 
 class PermissionChecker {
