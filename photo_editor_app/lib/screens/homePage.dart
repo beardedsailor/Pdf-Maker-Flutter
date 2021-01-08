@@ -4,7 +4,7 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_editor_app/screens/aboutUs.dart';
-import 'package:photo_editor_app/screens/makepdf.dart';
+import 'package:photo_editor_app/screens/pdf_history.dart';
 import 'package:photo_editor_app/screens/pdfviewerhistory.dart';
 import 'package:photo_editor_app/screens/photoEditing.dart';
 import 'package:photo_editor_app/utils/custom_colors.dart';
@@ -24,19 +24,17 @@ class _HomePageState extends State<HomePage> {
   List<File> images = [];
   Directory _photoDir =
       new Directory('data/user/0/com.example.photo_editor_app/app_flutter');
-  // Directory _photoDir = new Directory('/storage/emulated/0/photo_editor_app/');
-  // final   Directory _photoDir =  getApplicationDocumentsDirectory();
   final picker = ImagePicker();
-  int currentIndex = 0;
-  File userImgFile, schoolIDImgFile;
-  String userImgPath, schoolImgPath;
-  int select = 0;
+  File userImgFile;
+  String userImgPath;
   var imageList;
   var tempOutput;
-  bool value;
   int lengthOfSelectedList = 0;
   final pdf = pw.Document();
-  List<String> documentPath = [];
+  bool isLoading = true, next = false;
+  String pdfFileName;
+  TextEditingController _textFieldController = TextEditingController();
+  int index = 1;
 
   @override
   void initState() {
@@ -54,30 +52,38 @@ class _HomePageState extends State<HomePage> {
     var size = MediaQuery.of(context).size;
     final double itemHeight = (size.height - kToolbarHeight - 24) / 2;
     final double itemWidth = size.width / 2;
+    var width = MediaQuery.of(context).size.width;
+    var height = MediaQuery.of(context).size.height;
 
     return Scaffold(
       appBar: getAppBar(),
-      body: GridView.builder(
-          itemCount: tempOutput.length,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: (itemWidth / itemHeight),
-              crossAxisSpacing: 2,
-              mainAxisSpacing: 2),
-          itemBuilder: (context, index) {
-            return GridItem(
-                item: File(tempOutput[index]),
-                isSelected: (value) {
-                  setState(() {
-                    if (value) {
-                      selectedList.add(tempOutput[index]);
-                    } else {
-                      selectedList.remove(tempOutput[index]);
-                    }
-                  });
-                },
-                key: Key(tempOutput[index].toString()));
-          }),
+      body: (isLoading)
+          ? Center(
+              child: Text(
+              "Add Images to Start",
+              style: Elements.textStyle(15.0, Colors.grey),
+            ))
+          : GridView.builder(
+              itemCount: tempOutput.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: (itemWidth / itemHeight),
+                  crossAxisSpacing: 2,
+                  mainAxisSpacing: 2),
+              itemBuilder: (context, index) {
+                return GridItem(
+                    item: File(tempOutput[index]),
+                    isSelected: (value) {
+                      setState(() {
+                        if (value) {
+                          selectedList.add(tempOutput[index]);
+                        } else {
+                          selectedList.remove(tempOutput[index]);
+                        }
+                      });
+                    },
+                    key: Key(tempOutput[index].toString()));
+              }),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -141,7 +147,6 @@ class _HomePageState extends State<HomePage> {
                   ),
                   onPressed: () {
                     selectedList.clear();
-                    // print(documentPath[1]);
                     Navigator.push(
                         context,
                         new MaterialPageRoute(
@@ -162,14 +167,40 @@ class _HomePageState extends State<HomePage> {
                   }),
               new IconButton(
                   icon: new Icon(Icons.picture_as_pdf),
-                  onPressed: ()  async {
-                    for (var i in selectedList) {
-                      images.add(File(i));
+                  onPressed: () async {
+                    if (selectedList.isNotEmpty) {
+                      await _displayTextInputDialog(context);
+
+                      if (pdfFileName != "") {
+                        // pdfFileName = "Document " + index.toString();
+                        next = true;
+                        // index += 1;
+                      }
+                    } else {
+                      await _displayMessageDialog(context);
+                      setState(() {
+                        next = false;
+                      });
                     }
-                    if (images != null) {
-                    String a=await exportPdf(images);
-                      documentPath.add(a);
-                      // print(documentPath);
+                    if (next) {
+                      for (var i in selectedList) {
+                        images.add(File(i));
+                      }
+
+                      if (images.isNotEmpty) {
+                        print(pdfFileName);
+                        await exportPdf(images, pdfFileName,height,width);
+                        setState(() {
+                          pdfFileName = "";
+                          images.clear();
+                        });
+                      }
+                      setState(() {
+                        Navigator.push(
+                            context,
+                            new MaterialPageRoute(
+                                builder: (context) => PdfHistory()));
+                      });
                     }
                   }),
             ],
@@ -290,6 +321,14 @@ class _HomePageState extends State<HomePage> {
         .where((item1) => item1.endsWith(".jpg"))
         .toList();
     tempOutput = imageList.toList();
+    setState(() {
+      if (tempOutput.isEmpty) {
+        isLoading = true;
+      } else {
+        isLoading = false;
+      }
+    });
+    setState(() {});
   }
 
   photodirValue() async {
@@ -298,7 +337,60 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  int index = 0;
+  Future<void> _displayTextInputDialog(BuildContext context) async {
+    String valueText;
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Document Name'),
+            content: TextField(
+              onChanged: (value) {
+                setState(() {
+                  valueText = value;
+                });
+              },
+              controller: _textFieldController,
+              decoration: InputDecoration(hintText: "Enter Value"),
+            ),
+            actions: <Widget>[
+              FlatButton(
+                color: Colors.orange,
+                textColor: Colors.white,
+                child: Text('OK'),
+                onPressed: () {
+                  setState(() {
+                    pdfFileName = valueText;
+                    Navigator.pop(context);
+                  });
+                },
+              ),
+            ],
+          );
+        });
+  }
+
+  Future<void> _displayMessageDialog(BuildContext context) async {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Select images to make pdf'),
+            actions: <Widget>[
+              FlatButton(
+                color: Colors.orange,
+                textColor: Colors.white,
+                child: Text('OK'),
+                onPressed: () {
+                  setState(() {
+                    Navigator.pop(context);
+                  });
+                },
+              ),
+            ],
+          );
+        });
+  }
 }
 
 class Item {

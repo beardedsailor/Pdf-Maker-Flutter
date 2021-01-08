@@ -5,7 +5,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 var file1;
 File file;
-exportPdf(List<File> images) async {
+exportPdf(List<File> images, String pdfFileName,double height,double width) async {
   final Document pdf = Document();
   final filesToImages = images
       // ignore: deprecated_member_use
@@ -14,7 +14,9 @@ exportPdf(List<File> images) async {
             pdf.document,
             bytes: image.readAsBytesSync(),
           ),
-          height: 400))
+          height: height,
+          width: width
+          ))
       .toList();
   //TODO:make better ui
   pdf.addPage(MultiPage(
@@ -36,7 +38,7 @@ exportPdf(List<File> images) async {
         );
       },
       build: (Context context) => <Widget>[...filesToImages]));
-  String a = await savePdf(pdf);
+  String a = await savePdf(pdf,pdfFileName);
   return a;
   // return file.path.toString();
 
@@ -44,7 +46,7 @@ exportPdf(List<File> images) async {
   // return a;
 }
 
-savePdf(Document pdf) async {
+savePdf(Document pdf, String pdfFileName) async {
   const pdfPathAndroid = "storage/emulated/0/photo_edito_app";
   //this supports only android currently
   final bool permission = await permision.checkPermission();
@@ -56,9 +58,9 @@ savePdf(Document pdf) async {
     if (!hasExisted) {
       appDocDir.create();
     }
-    final now = DateTime.now().millisecondsSinceEpoch.toString();
+    // final now = DateTime.now().millisecondsSinceEpoch.toString();
     print(appDocDir.path);
-    file = File('${appDocDir.path}/+${now.substring(9)}.pdf');
+    file = File('${appDocDir.path}/$pdfFileName.pdf');
     await file.create(recursive: true);
     final data = pdf.save();
     await file.writeAsBytes(data);
