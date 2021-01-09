@@ -15,8 +15,9 @@ exportPdf(List<File> images, String pdfFileName,double height,double width) asyn
             bytes: image.readAsBytesSync(),
           ),
           height: height,
-          width: width
+          // width: width
           ))
+          // _imageFit.add(pw.BoxFit.values[i]);
       .toList();
   //TODO:make better ui
   pdf.addPage(MultiPage(

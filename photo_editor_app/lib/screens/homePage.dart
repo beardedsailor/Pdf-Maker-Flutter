@@ -35,6 +35,9 @@ class _HomePageState extends State<HomePage> {
   String pdfFileName;
   TextEditingController _textFieldController = TextEditingController();
   int index = 1;
+  // List<bool> isSelected1 = [false, false, false, false, false];
+  List<bool> isSelected1 = [];
+  var unique;
 
   @override
   void initState() {
@@ -43,6 +46,12 @@ class _HomePageState extends State<HomePage> {
       _photoDir = new Directory('/storage/emulated/0/photo_editor_app/');
       loadImageList();
     });
+    setState(() {
+      for (int i = 0; i < tempOutput.length; i++) {
+        isSelected1.add(false);
+      }
+    });
+
     super.initState();
     setState(() {});
   }
@@ -54,160 +63,216 @@ class _HomePageState extends State<HomePage> {
     final double itemWidth = size.width / 2;
     var width = MediaQuery.of(context).size.width;
     var height = MediaQuery.of(context).size.height;
+    return new WillPopScope(
+        onWillPop: () async => false,
+        child: Scaffold(
+          appBar: getAppBar(),
+          body: (isLoading)
+              ? Center(
+                  child: Text(
+                  "Add Images to Start",
+                  style: Elements.textStyle(15.0, Colors.grey),
+                ))
+              : GridView.builder(
+                  itemCount: tempOutput.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: (itemWidth / itemHeight),
+                      crossAxisSpacing: 2,
+                      mainAxisSpacing: 2),
+                  itemBuilder: (context, index) {
+                    return InkWell(
+                      onTap: () {
+                        setState(() {
+                          isSelected1[index] = !isSelected1[index];
 
-    return Scaffold(
-      appBar: getAppBar(),
-      body: (isLoading)
-          ? Center(
-              child: Text(
-              "Add Images to Start",
-              style: Elements.textStyle(15.0, Colors.grey),
-            ))
-          : GridView.builder(
-              itemCount: tempOutput.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: (itemWidth / itemHeight),
-                  crossAxisSpacing: 2,
-                  mainAxisSpacing: 2),
-              itemBuilder: (context, index) {
-                return GridItem(
-                    item: File(tempOutput[index]),
-                    isSelected: (value) {
-                      setState(() {
-                        if (value) {
-                          selectedList.add(tempOutput[index]);
-                        } else {
-                          selectedList.remove(tempOutput[index]);
-                        }
-                      });
-                    },
-                    key: Key(tempOutput[index].toString()));
-              }),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-                child: Stack(
-              alignment: AlignmentDirectional.topStart,
-              children: [
-                Container(
-                  decoration: new BoxDecoration(
-                    color: Colors.lightBlue,
-                    borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.elliptical(220, 50),
-                        bottomRight: Radius.elliptical(220, 50)),
-                  ),
-                  height: 250,
-                  child: Center(
-                    child: Text(
-                      'Welcome',
-                      style: Elements.textStyle(20.0, Colors.white),
+                          if (isSelected1[index]) {
+                            selectedList.add(tempOutput[index]);
+                          } else {
+                            selectedList.remove(tempOutput[index]);
+                          }
+                        });
+                      },
+                      child: Stack(
+                        children: <Widget>[
+                          Image.file(
+                            File(tempOutput[index]),
+                            color: Colors.black
+                                .withOpacity(isSelected1[index] ? 0.9 : 0),
+                            colorBlendMode: BlendMode.color,
+                          ),
+                          isSelected1[index]
+                              ? Align(
+                                  alignment: Alignment.bottomRight,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Icon(
+                                      Icons.check_circle,
+                                      color: Colors.blue,
+                                    ),
+                                  ),
+                                )
+                              : Container()
+                        ],
+                      ),
+                    );
+                  }),
+          drawer: Drawer(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: <Widget>[
+                DrawerHeader(
+                    child: Stack(
+                  alignment: AlignmentDirectional.topStart,
+                  children: [
+                    Container(
+                      decoration: new BoxDecoration(
+                        color: Colors.pinkAccent,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.elliptical(220, 50),
+                          topRight: Radius.elliptical(220, 50),
+                            bottomLeft: Radius.elliptical(220, 50),
+                            bottomRight: Radius.elliptical(220, 50)),
+                      ),
+                      height: 250,
+                      child: Center(
+                        child: Text(
+                          'PDF MAKER',
+                          style: Elements.textStyle(20.0, Colors.white),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ],
-            )),
-            ListTile(
-              title: Text('Homepage'),
-              onTap: () {
-                Navigator.push(context,
-                    new MaterialPageRoute(builder: (context) => HomePage()));
-              },
-            ),
-            ListTile(
-              title: Text('About Us'),
-              onTap: () {
-                Navigator.push(context,
-                    new MaterialPageRoute(builder: (context) => AboutUs()));
-              },
-            ),
-            ListTile(
-              title: Text('Whats New'),
-              onTap: () {
-                Navigator.push(context,
-                    new MaterialPageRoute(builder: (context) => HomePage()));
-              },
-            ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: BottomAppBar(
-        child: Container(
-          height: 60,
-          color: Colors.lightBlue,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              new IconButton(
-                  icon: new Icon(
-                    Icons.history_rounded,
-                    semanticLabel: "History",
-                  ),
-                  onPressed: () {
-                    selectedList.clear();
+                  ],
+                )),
+                ListTile(
+                  leading: new Icon(Icons.home_outlined, color: Colors.lightBlue,size: 35,),
+                  title: Text('Homepage', style: Elements.textStyle(18.0, Colors.pinkAccent),),
+                  onTap: () {
                     Navigator.push(
                         context,
                         new MaterialPageRoute(
-                            builder: (context) => PdfHistory()));
-                  }),
-              new IconButton(
-                  icon: new Icon(
-                    Icons.camera_alt,
-                    semanticLabel: "Camera",
-                  ),
-                  onPressed: () {
-                    getCameraImageDetails();
-                  }),
-              new IconButton(
-                  icon: new Icon(Icons.photo_library),
-                  onPressed: () {
-                    getgalleryImageDetails();
-                  }),
-              new IconButton(
-                  icon: new Icon(Icons.picture_as_pdf),
-                  onPressed: () async {
-                    if (selectedList.isNotEmpty) {
-                      await _displayTextInputDialog(context);
+                            builder: (context) => HomePage()));
+                  },
+                ),
+                ListTile(
+                  leading: new Icon(Icons.file_present, color: Colors.lightBlue,size: 35,),
+                  title: Text('My Files', style: Elements.textStyle(18.0, Colors.pinkAccent),),
+                  onTap: () {
+                    Navigator.push(context,
+                        new MaterialPageRoute(builder: (context) => PdfHistory()));
+                  },
+                ),
+                ListTile(
+                  leading: new Icon(Icons.person_outline_outlined,color: Colors.lightBlue,size: 35,),
+                  title: Text('About', style: Elements.textStyle(18.0, Colors.pinkAccent),),
+                  onTap: () {
+                    Navigator.push(context,
+                        new MaterialPageRoute(builder: (context) => AboutUs()));
+                  },
+                  focusColor: Colors.grey,
+                ),
+                ListTile(
+                  leading: new Icon(Icons.new_releases_outlined, color: Colors.lightBlue,size: 35,),
+                  title: Text("What's New", style: Elements.textStyle(18.0, Colors.pinkAccent),),
+                  onTap: () {
+                    // Navigator.push(
+                    //     context,
+                    //     new MaterialPageRoute(
+                    //         builder: (context) => HomePage()));
+                  },
+                ),
+                ListTile(
+                  leading: new Icon(Icons.rate_review_outlined,color: Colors.lightBlue,size: 35,),
+                  title: Text('Rate Us', style: Elements.textStyle(18.0, Colors.pinkAccent),),
+                  onTap: () {
+                    // Navigator.push(context,
+                    //     new MaterialPageRoute(builder: (context) => ));
+                  },
+                ),
 
-                      if (pdfFileName != "") {
-                        // pdfFileName = "Document " + index.toString();
-                        next = true;
-                        // index += 1;
-                      }
-                    } else {
-                      await _displayMessageDialog(context);
-                      setState(() {
-                        next = false;
-                      });
-                    }
-                    if (next) {
-                      for (var i in selectedList) {
-                        images.add(File(i));
-                      }
-
-                      if (images.isNotEmpty) {
-                        print(pdfFileName);
-                        await exportPdf(images, pdfFileName,height,width);
-                        setState(() {
-                          pdfFileName = "";
-                          images.clear();
-                        });
-                      }
-                      setState(() {
+              ],
+            ),
+          ),
+          bottomNavigationBar: BottomAppBar(
+            child: Container(
+              height: 60,
+              color: Colors.lightBlue,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  new IconButton(
+                      icon: new Icon(
+                        Icons.history_rounded,
+                        semanticLabel: "History",
+                      ),
+                      onPressed: () {
+                        selectedList.clear();
                         Navigator.push(
                             context,
                             new MaterialPageRoute(
                                 builder: (context) => PdfHistory()));
-                      });
-                    }
-                  }),
-            ],
+                      }),
+                  new IconButton(
+                      icon: new Icon(
+                        Icons.camera_alt,
+                        semanticLabel: "Camera",
+                      ),
+                      onPressed: () {
+                        getCameraImageDetails();
+                      }),
+                  new IconButton(
+                      icon: new Icon(Icons.photo_library),
+                      onPressed: () {
+                        getgalleryImageDetails();
+                      }),
+                  new IconButton(
+                      icon: new Icon(Icons.picture_as_pdf),
+                      onPressed: () async {
+                        if (selectedList.isNotEmpty) {
+                          await _displayTextInputDialog(context);
+
+                          if (pdfFileName != "") {
+                            // pdfFileName = "Document " + index.toString();
+                            next = true;
+                            // index += 1;
+                          }
+                        } else {
+                          await _displayMessageDialog(context);
+                          setState(() {
+                            next = false;
+                          });
+                        }
+                        if (next) {
+                          for (var i in selectedList) {
+                            images.add(File(i));
+                          }
+
+                          if (images.isNotEmpty) {
+                            print(pdfFileName);
+                            await exportPdf(images, pdfFileName, height, width);
+                            setState(() {
+                              pdfFileName = "";
+                              for (int i = 0; i < tempOutput.length; i++) {
+                                isSelected1[i] = false;
+                              }
+                              selectedList.clear();
+
+                              images.clear();
+                            });
+                          }
+                          setState(() {
+                            Navigator.push(
+                                context,
+                                new MaterialPageRoute(
+                                    builder: (context) => PdfHistory()));
+                          });
+                        }
+                      }),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 
   void getCameraImageDetails() async {
