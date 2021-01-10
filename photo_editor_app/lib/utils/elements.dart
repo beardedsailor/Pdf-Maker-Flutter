@@ -27,12 +27,14 @@ class Elements {
       new BorderSide(color: inputColor, width: inputWidth);
 
   /// this function is called to set the textStyle
-  static TextStyle textStyle(fontsize, fontcolor, {fontWeight}) =>
+  static TextStyle textStyle(fontsize, fontcolor, {fontWeight,letterSpacing}) =>
       new TextStyle(
           color: fontcolor,
           fontSize: fontsize,
           fontFamily: 'ProductSans',
-          fontWeight: fontWeight);
+          fontWeight: fontWeight,
+          letterSpacing: letterSpacing
+          );
 
   static TextStyle labelStyle() =>
       TextStyle(color: Colors.black, fontFamily: 'ProductSans');
@@ -120,12 +122,14 @@ class Elements {
         text,
         style: Elements.textStyle(20.0, Colors.white),
       ),
-      backgroundColor: CustomColors.themeBlue,
+      backgroundColor: Colors.cyanAccent[700],
       //Back arrow present in AppBar
       leading: IconButton(
         icon: new Icon(icon),
         onPressed: onPressed,
       ),
+      
+    
     );
   }
 

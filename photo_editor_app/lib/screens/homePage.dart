@@ -12,7 +12,6 @@ import 'package:photo_editor_app/utils/elements.dart';
 import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:photo_editor_app/utils/griditem.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -35,7 +34,6 @@ class _HomePageState extends State<HomePage> {
   String pdfFileName;
   TextEditingController _textFieldController = TextEditingController();
   int index = 1;
-  // List<bool> isSelected1 = [false, false, false, false, false];
   List<bool> isSelected1 = [];
   var unique;
 
@@ -121,32 +119,25 @@ class _HomePageState extends State<HomePage> {
             child: ListView(
               padding: EdgeInsets.zero,
               children: <Widget>[
-                DrawerHeader(
-                    child: Stack(
-                  alignment: AlignmentDirectional.topStart,
-                  children: [
-                    Container(
-                      decoration: new BoxDecoration(
-                        color: Colors.pinkAccent,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.elliptical(220, 50),
-                          topRight: Radius.elliptical(220, 50),
-                            bottomLeft: Radius.elliptical(220, 50),
-                            bottomRight: Radius.elliptical(220, 50)),
-                      ),
-                      height: 250,
-                      child: Center(
-                        child: Text(
-                          'PDF MAKER',
-                          style: Elements.textStyle(20.0, Colors.white),
-                        ),
-                      ),
-                    ),
-                  ],
-                )),
+                Container(
+                  height: 220,
+                  child: DrawerHeader(
+                    
+        child: Center(
+          
+          child: Text(
+            "PDF MAKER",
+            style: Elements.textStyle(25.0, Colors.white, fontWeight: FontWeight.bold,letterSpacing:2.0),
+           ),
+        ),
+         decoration: BoxDecoration(
+           color: Colors.cyanAccent[700],
+         ),
+      ),
+                ),                   
                 ListTile(
-                  leading: new Icon(Icons.home_outlined, color: Colors.lightBlue,size: 35,),
-                  title: Text('Homepage', style: Elements.textStyle(18.0, Colors.pinkAccent),),
+                  leading: new Icon(Icons.home_outlined, color: Colors.cyanAccent[700],size: 35,),
+                  title: Text('Homepage', style: Elements.textStyle(18.0, Colors.cyanAccent[700]),),
                   onTap: () {
                     Navigator.push(
                         context,
@@ -155,16 +146,16 @@ class _HomePageState extends State<HomePage> {
                   },
                 ),
                 ListTile(
-                  leading: new Icon(Icons.file_present, color: Colors.lightBlue,size: 35,),
-                  title: Text('My Files', style: Elements.textStyle(18.0, Colors.pinkAccent),),
+                  leading: new Icon(Icons.file_present, color: Colors.cyanAccent[700],size: 35,),
+                  title: Text('My Files', style: Elements.textStyle(18.0, Colors.cyanAccent[700]),),
                   onTap: () {
                     Navigator.push(context,
                         new MaterialPageRoute(builder: (context) => PdfHistory()));
                   },
                 ),
                 ListTile(
-                  leading: new Icon(Icons.person_outline_outlined,color: Colors.lightBlue,size: 35,),
-                  title: Text('About', style: Elements.textStyle(18.0, Colors.pinkAccent),),
+                  leading: new Icon(Icons.person_outline_outlined,color: Colors.cyanAccent[700],size: 35,),
+                  title: Text('About', style: Elements.textStyle(18.0, Colors.cyanAccent[700]),),
                   onTap: () {
                     Navigator.push(context,
                         new MaterialPageRoute(builder: (context) => AboutUs()));
@@ -172,8 +163,8 @@ class _HomePageState extends State<HomePage> {
                   focusColor: Colors.grey,
                 ),
                 ListTile(
-                  leading: new Icon(Icons.new_releases_outlined, color: Colors.lightBlue,size: 35,),
-                  title: Text("What's New", style: Elements.textStyle(18.0, Colors.pinkAccent),),
+                  leading: new Icon(Icons.new_releases_outlined, color: Colors.cyanAccent[700],size: 35,),
+                  title: Text("What's New", style: Elements.textStyle(18.0, Colors.cyanAccent[700]),),
                   onTap: () {
                     // Navigator.push(
                     //     context,
@@ -182,8 +173,8 @@ class _HomePageState extends State<HomePage> {
                   },
                 ),
                 ListTile(
-                  leading: new Icon(Icons.rate_review_outlined,color: Colors.lightBlue,size: 35,),
-                  title: Text('Rate Us', style: Elements.textStyle(18.0, Colors.pinkAccent),),
+                  leading: new Icon(Icons.rate_review_outlined,color: Colors.cyanAccent[700],size: 35,),
+                  title: Text('Rate Us', style: Elements.textStyle(18.0, Colors.cyanAccent[700]),),
                   onTap: () {
                     // Navigator.push(context,
                     //     new MaterialPageRoute(builder: (context) => ));
@@ -196,7 +187,7 @@ class _HomePageState extends State<HomePage> {
           bottomNavigationBar: BottomAppBar(
             child: Container(
               height: 60,
-              color: Colors.lightBlue,
+              color: Colors.cyanAccent[700],
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -204,6 +195,7 @@ class _HomePageState extends State<HomePage> {
                       icon: new Icon(
                         Icons.history_rounded,
                         semanticLabel: "History",
+                        color: Colors.white,
                       ),
                       onPressed: () {
                         selectedList.clear();
@@ -216,17 +208,20 @@ class _HomePageState extends State<HomePage> {
                       icon: new Icon(
                         Icons.camera_alt,
                         semanticLabel: "Camera",
+                        color: Colors.white,
                       ),
                       onPressed: () {
                         getCameraImageDetails();
                       }),
                   new IconButton(
-                      icon: new Icon(Icons.photo_library),
+                      icon: new Icon(Icons.photo_library,
+                      color: Colors.white,),
                       onPressed: () {
                         getgalleryImageDetails();
                       }),
                   new IconButton(
-                      icon: new Icon(Icons.picture_as_pdf),
+                      icon: new Icon(Icons.picture_as_pdf,
+                      color: Colors.white,),
                       onPressed: () async {
                         if (selectedList.isNotEmpty) {
                           await _displayTextInputDialog(context);
@@ -367,6 +362,8 @@ class _HomePageState extends State<HomePage> {
                   child: Icon(Icons.delete),
                 ))
       ],
+      backgroundColor: Colors.cyanAccent[700],
+      
     );
   }
 

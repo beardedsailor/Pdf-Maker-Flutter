@@ -103,7 +103,7 @@ class _PhotoEditingState extends State<PhotoEditing> {
                       _saveScreen();
                     })
               ]),
-          backgroundColor: CustomColors.themeBlue,
+          backgroundColor: Colors.cyanAccent[700],
           //Back arrow present in AppBar
           leading: IconButton(
             icon: new Icon(Icons.arrow_back),
@@ -124,7 +124,7 @@ class _PhotoEditingState extends State<PhotoEditing> {
       bottomNavigationBar: BottomNavigationBar(
         onTap: onTappedBar,
         currentIndex: currentIndex,
-        backgroundColor: Colors.lightBlue,
+        backgroundColor: Colors.cyanAccent[700],
         selectedItemColor: CustomColors.themeBlue,
         items: [
           BottomNavigationBarItem(
