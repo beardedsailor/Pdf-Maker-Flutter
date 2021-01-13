@@ -48,7 +48,7 @@ exportPdf(List<File> images, String pdfFileName,double height,double width) asyn
 }
 
 savePdf(Document pdf, String pdfFileName) async {
-  const pdfPathAndroid = "storage/emulated/0/photo_edito_app";
+  const pdfPathAndroid = "/storage/emulated/0/Pdf Maker";
   //this supports only android currently
   final bool permission = await permision.checkPermission();
   if (!permission) {

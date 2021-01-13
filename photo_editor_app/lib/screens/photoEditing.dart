@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:flutter/material.dart';
+// import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path1;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_editor_app/screens/homePage.dart';
@@ -182,12 +184,37 @@ class _PhotoEditingState extends State<PhotoEditing> {
     ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     final result =
         await ImageGallerySaver.saveImage(byteData.buffer.asUint8List());
-    print(result);
-    var appDocDir = await getTemporaryDirectory();
-    print(appDocDir);
-    final Directory check = await getApplicationDocumentsDirectory();
+        // ImageGallerySaver.saveFile(file)
 
-    print(result);
+    // print(result);
+    // var sourceFile = result['filePath'];
+    // String x = sourceFile.toString();
+    // x = x.substring(7);
+    // File file1 = new File(x);
+    // final Directory ab = await getExternalStorageDirectory();
+    // print(ab);
+    // print(file1);
+    // // print(sourceFile.toString());
+    // var basNameWithExtension = path1.basename(file1.path);
+    // print(basNameWithExtension);
+    // final Directory check = await getApplicationDocumentsDirectory();
+    // // String folderName = "/AllFiles";
+    // String a = "${check.path}";
+    // // a=a.substring(11);
+    // final Directory _appDocDirFolder = Directory(ab.path);
+    // // final Directory _appDocDirFolder = Directory('${check.path}/AllFiles');
+    // File newImage = await file1.copy('$_appDocDirFolder');
+    // print(newImage);
+    // print(_appDocDirFolder);
+    // var file =
+    // await moveFile(
+    //     file1, _appDocDirFolder.path + "/" + basNameWithExtension);
+    // print(file);
+    // var appDocDir = await getTemporaryDirectory();
+    // print(appDocDir);
+    // final Directory check = await getApplicationDocumentsDirectory();
+
+    // print(result);
     _toastInfo(result.toString());
 
     setState(() {
@@ -198,5 +225,15 @@ class _PhotoEditingState extends State<PhotoEditing> {
 
   _toastInfo(String info) {
     Fluttertoast.showToast(msg: info, toastLength: Toast.LENGTH_LONG);
+  }
+
+  Future<File> moveFile(File sourceFile, String newPath) async {
+    print("hello");
+    // try {
+    //   return await sourceFile.rename(newPath);
+    // } catch (e) {
+    final newFile = await sourceFile.copy(newPath);
+    print(newFile);
+    return newFile;
   }
 }

@@ -1,7 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+// import 'package:path_provider_ex/path_provider_ex.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_editor_app/screens/aboutUs.dart';
 import 'package:photo_editor_app/screens/pdf_history.dart';
@@ -12,6 +15,7 @@ import 'package:photo_editor_app/utils/elements.dart';
 import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:pdf/widgets.dart' as pw;
+// import 'package:simple_permissions/simple_permissions.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -26,8 +30,8 @@ class _HomePageState extends State<HomePage> {
   final picker = ImagePicker();
   File userImgFile;
   String userImgPath;
-  var imageList;
-  var tempOutput;
+  List imageList;
+  List tempOutput;
   int lengthOfSelectedList = 0;
   final pdf = pw.Document();
   bool isLoading = true, next = false;
@@ -41,13 +45,11 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     _requestPermission();
     setState(() {
-      _photoDir = new Directory('/storage/emulated/0/photo_editor_app/');
-      loadImageList();
+      isLoading = true;
     });
     setState(() {
-      for (int i = 0; i < tempOutput.length; i++) {
-        isSelected1.add(false);
-      }
+      loadImageList();
+      _photoDir = new Directory('/storage/emulated/0/Pdf Maker/');
     });
 
     super.initState();
@@ -55,10 +57,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _textFieldController.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    var size = MediaQuery.of(context).size;
-    final double itemHeight = (size.height - kToolbarHeight - 24) / 2;
-    final double itemWidth = size.width / 2;
+    // var size = MediaQuery.of(context).size;
     var width = MediaQuery.of(context).size.width;
     var height = MediaQuery.of(context).size.height;
     return new WillPopScope(
@@ -71,50 +78,51 @@ class _HomePageState extends State<HomePage> {
                   "Add Images to Start",
                   style: Elements.textStyle(15.0, Colors.grey),
                 ))
-              : GridView.builder(
+              : new StaggeredGridView.countBuilder(
+                  crossAxisCount: 4,
                   itemCount: tempOutput.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: (itemWidth / itemHeight),
-                      crossAxisSpacing: 2,
-                      mainAxisSpacing: 2),
-                  itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: () {
-                        setState(() {
-                          isSelected1[index] = !isSelected1[index];
+                  itemBuilder: (BuildContext context, int index) => InkWell(
+                    onTap: () {
+                      setState(() {
+                        isSelected1[index] = !isSelected1[index];
 
-                          if (isSelected1[index]) {
-                            selectedList.add(tempOutput[index]);
-                          } else {
-                            selectedList.remove(tempOutput[index]);
-                          }
-                        });
-                      },
-                      child: Stack(
-                        children: <Widget>[
-                          Image.file(
-                            File(tempOutput[index]),
-                            color: Colors.black
-                                .withOpacity(isSelected1[index] ? 0.9 : 0),
-                            colorBlendMode: BlendMode.color,
-                          ),
-                          isSelected1[index]
-                              ? Align(
-                                  alignment: Alignment.bottomRight,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Icon(
-                                      Icons.check_circle,
-                                      color: Colors.blue,
-                                    ),
+                        if (isSelected1[index]) {
+                          selectedList.add(tempOutput[index]);
+                        } else {
+                          selectedList.remove(tempOutput[index]);
+                        }
+                      });
+                    },
+                    child: Stack(
+                      fit: StackFit.passthrough,
+                      children: <Widget>[
+                        Image.file(
+                          File(tempOutput[index]),
+                          color: Colors.black
+                              .withOpacity(isSelected1[index] ? 0.9 : 0),
+                          colorBlendMode: BlendMode.color,
+                          fit: BoxFit.fill,
+                        ),
+                        isSelected1[index]
+                            ? Align(
+                                alignment: Alignment.bottomRight,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Icon(
+                                    Icons.check_circle,
+                                    color: Colors.blue,
                                   ),
-                                )
-                              : Container()
-                        ],
-                      ),
-                    );
-                  }),
+                                ),
+                              )
+                            : Container()
+                      ],
+                    ),
+                  ),
+                  staggeredTileBuilder: (int index) =>
+                      new StaggeredTile.count(2, index.isEven ? 2 : 2),
+                  mainAxisSpacing: 4.0,
+                  crossAxisSpacing: 4.0,
+                ),
           drawer: Drawer(
             child: ListView(
               padding: EdgeInsets.zero,
@@ -122,22 +130,28 @@ class _HomePageState extends State<HomePage> {
                 Container(
                   height: 220,
                   child: DrawerHeader(
-                    
-        child: Center(
-          
-          child: Text(
-            "PDF MAKER",
-            style: Elements.textStyle(25.0, Colors.white, fontWeight: FontWeight.bold,letterSpacing:2.0),
-           ),
-        ),
-         decoration: BoxDecoration(
-           color: Colors.cyanAccent[700],
-         ),
-      ),
-                ),                   
+                    child: Center(
+                      child: Text(
+                        "PDF MAKER",
+                        style: Elements.textStyle(25.0, Colors.white,
+                            fontWeight: FontWeight.bold, letterSpacing: 2.0),
+                      ),
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.cyanAccent[700],
+                    ),
+                  ),
+                ),
                 ListTile(
-                  leading: new Icon(Icons.home_outlined, color: Colors.cyanAccent[700],size: 35,),
-                  title: Text('Homepage', style: Elements.textStyle(18.0, Colors.cyanAccent[700]),),
+                  leading: new Icon(
+                    Icons.home_outlined,
+                    color: Colors.cyanAccent[700],
+                    size: 35,
+                  ),
+                  title: Text(
+                    'Homepage',
+                    style: Elements.textStyle(18.0, Colors.cyanAccent[700]),
+                  ),
                   onTap: () {
                     Navigator.push(
                         context,
@@ -146,16 +160,32 @@ class _HomePageState extends State<HomePage> {
                   },
                 ),
                 ListTile(
-                  leading: new Icon(Icons.file_present, color: Colors.cyanAccent[700],size: 35,),
-                  title: Text('My Files', style: Elements.textStyle(18.0, Colors.cyanAccent[700]),),
+                  leading: new Icon(
+                    Icons.file_present,
+                    color: Colors.cyanAccent[700],
+                    size: 35,
+                  ),
+                  title: Text(
+                    'My Files',
+                    style: Elements.textStyle(18.0, Colors.cyanAccent[700]),
+                  ),
                   onTap: () {
-                    Navigator.push(context,
-                        new MaterialPageRoute(builder: (context) => PdfHistory()));
+                    Navigator.push(
+                        context,
+                        new MaterialPageRoute(
+                            builder: (context) => PdfHistory()));
                   },
                 ),
                 ListTile(
-                  leading: new Icon(Icons.person_outline_outlined,color: Colors.cyanAccent[700],size: 35,),
-                  title: Text('About', style: Elements.textStyle(18.0, Colors.cyanAccent[700]),),
+                  leading: new Icon(
+                    Icons.person_outline_outlined,
+                    color: Colors.cyanAccent[700],
+                    size: 35,
+                  ),
+                  title: Text(
+                    'About',
+                    style: Elements.textStyle(18.0, Colors.cyanAccent[700]),
+                  ),
                   onTap: () {
                     Navigator.push(context,
                         new MaterialPageRoute(builder: (context) => AboutUs()));
@@ -163,8 +193,15 @@ class _HomePageState extends State<HomePage> {
                   focusColor: Colors.grey,
                 ),
                 ListTile(
-                  leading: new Icon(Icons.new_releases_outlined, color: Colors.cyanAccent[700],size: 35,),
-                  title: Text("What's New", style: Elements.textStyle(18.0, Colors.cyanAccent[700]),),
+                  leading: new Icon(
+                    Icons.new_releases_outlined,
+                    color: Colors.cyanAccent[700],
+                    size: 35,
+                  ),
+                  title: Text(
+                    "What's New",
+                    style: Elements.textStyle(18.0, Colors.cyanAccent[700]),
+                  ),
                   onTap: () {
                     // Navigator.push(
                     //     context,
@@ -173,14 +210,20 @@ class _HomePageState extends State<HomePage> {
                   },
                 ),
                 ListTile(
-                  leading: new Icon(Icons.rate_review_outlined,color: Colors.cyanAccent[700],size: 35,),
-                  title: Text('Rate Us', style: Elements.textStyle(18.0, Colors.cyanAccent[700]),),
+                  leading: new Icon(
+                    Icons.rate_review_outlined,
+                    color: Colors.cyanAccent[700],
+                    size: 35,
+                  ),
+                  title: Text(
+                    'Rate Us',
+                    style: Elements.textStyle(18.0, Colors.cyanAccent[700]),
+                  ),
                   onTap: () {
                     // Navigator.push(context,
                     //     new MaterialPageRoute(builder: (context) => ));
                   },
                 ),
-
               ],
             ),
           ),
@@ -214,22 +257,24 @@ class _HomePageState extends State<HomePage> {
                         getCameraImageDetails();
                       }),
                   new IconButton(
-                      icon: new Icon(Icons.photo_library,
-                      color: Colors.white,),
+                      icon: new Icon(
+                        Icons.photo_library,
+                        color: Colors.white,
+                      ),
                       onPressed: () {
                         getgalleryImageDetails();
                       }),
                   new IconButton(
-                      icon: new Icon(Icons.picture_as_pdf,
-                      color: Colors.white,),
+                      icon: new Icon(
+                        Icons.picture_as_pdf,
+                        color: Colors.white,
+                      ),
                       onPressed: () async {
                         if (selectedList.isNotEmpty) {
                           await _displayTextInputDialog(context);
 
                           if (pdfFileName != "") {
-                            // pdfFileName = "Document " + index.toString();
                             next = true;
-                            // index += 1;
                           }
                         } else {
                           await _displayMessageDialog(context);
@@ -363,7 +408,6 @@ class _HomePageState extends State<HomePage> {
                 ))
       ],
       backgroundColor: Colors.cyanAccent[700],
-      
     );
   }
 
@@ -377,25 +421,31 @@ class _HomePageState extends State<HomePage> {
   }
 
   loadImageList() async {
-    imageList = _photoDir
-        .listSync()
-        .map((item1) => item1.path)
-        .where((item1) => item1.endsWith(".jpg"))
-        .toList();
-    tempOutput = imageList.toList();
+    var path = await savefile();
+    _requestPermission();
+    print(_photoDir);
     setState(() {
-      if (tempOutput.isEmpty) {
-        isLoading = true;
-      } else {
-        isLoading = false;
-      }
+      imageList = _photoDir
+          .listSync()
+          .map((item1) => item1.path)
+          .where((item1) => item1.endsWith(".jpg"))
+          .toList(growable: true);
+      tempOutput = imageList.toList();
+      print(tempOutput);
+      setState(() {
+        if (tempOutput.isEmpty) {
+          isLoading = true;
+        } else {
+          isLoading = false;
+        }
+      });
     });
-    setState(() {});
-  }
-
-  photodirValue() async {
-    new Timer(const Duration(milliseconds: 1000), () {
-      _photoDir = new Directory('/storage/emulated/0/photo_editor_app/');
+    setState(() {
+      if (isSelected1.length < tempOutput.length) {
+        for (int i = 0; i <= tempOutput.length - isSelected1.length; i++) {
+          isSelected1.add(false);
+        }
+      }
     });
   }
 
@@ -453,10 +503,23 @@ class _HomePageState extends State<HomePage> {
           );
         });
   }
-}
 
-class Item {
-  File imageUrl;
-  int rank;
-  Item(this.imageUrl, this.rank);
+// Document pdf, String pdfFileName
+  savefile() async {
+    const pdfPathAndroid = "storage/emulated/0/Pdf Maker/";
+    //this supports only android currently
+    final bool permission = await permision.checkPermission();
+    String pdfFileName = "hello";
+    if (!permission) {
+      await permision.requestPermission();
+    } else {
+      final Directory appDocDir = Directory(pdfPathAndroid);
+      final bool hasExisted = await appDocDir.exists();
+      if (!hasExisted) {
+        appDocDir.create();
+      }
+      return appDocDir.path;
+    }
+    return "";
+  }
 }
