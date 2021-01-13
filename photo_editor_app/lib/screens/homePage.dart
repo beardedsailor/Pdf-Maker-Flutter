@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
-// import 'package:path_provider_ex/path_provider_ex.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_editor_app/screens/aboutUs.dart';
 import 'package:photo_editor_app/screens/pdf_history.dart';
@@ -15,7 +13,6 @@ import 'package:photo_editor_app/utils/elements.dart';
 import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:pdf/widgets.dart' as pw;
-// import 'package:simple_permissions/simple_permissions.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -384,7 +381,7 @@ class _HomePageState extends State<HomePage> {
 
   getAppBar() {
     lengthOfSelectedList = selectedList.length;
-    print(lengthOfSelectedList);
+    // print(lengthOfSelectedList);
     return AppBar(
       title: Text(selectedList.length < 1
           ? "Photo Editor"
@@ -400,7 +397,11 @@ class _HomePageState extends State<HomePage> {
                     selectedList.removeAt(0);
                     lengthOfSelectedList--;
                   }
-                  setState(() {});
+                  setState(() {
+                    if (tempOutput.length == 0) {
+                      isLoading = true;
+                    }
+                  });
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),

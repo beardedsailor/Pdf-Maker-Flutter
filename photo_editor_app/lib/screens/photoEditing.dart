@@ -174,7 +174,7 @@ class _PhotoEditingState extends State<PhotoEditing> {
 
     final info = statuses[Permission.storage].toString();
     print(info);
-    _toastInfo(info);
+    // _toastInfo(info);
   }
 
   _saveScreen() async {
@@ -215,7 +215,7 @@ class _PhotoEditingState extends State<PhotoEditing> {
     // final Directory check = await getApplicationDocumentsDirectory();
 
     // print(result);
-    _toastInfo(result.toString());
+    // _toastInfo(result.toString());
 
     setState(() {
       Navigator.push(
@@ -223,9 +223,9 @@ class _PhotoEditingState extends State<PhotoEditing> {
     });
   }
 
-  _toastInfo(String info) {
-    Fluttertoast.showToast(msg: info, toastLength: Toast.LENGTH_LONG);
-  }
+  // _toastInfo(String info) {
+  //   Fluttertoast.showToast(msg: info, toastLength: Toast.LENGTH_LONG);
+  // }
 
   Future<File> moveFile(File sourceFile, String newPath) async {
     print("hello");

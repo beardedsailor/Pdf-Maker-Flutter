@@ -17,7 +17,12 @@ class _AboutUsState extends State<AboutUs> {
       }),
       body: Container(
         child: new Center(
-          child: new Text("Welcome to Photo editor app. This app helps you to make pdf from photo"),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: new Text("Welcome, This app helps you to make pdf from photos",
+            style: Elements.textStyle(30.0, Colors.black87)
+            ),
+          ),
         ),
       ),
     );
